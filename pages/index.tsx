@@ -71,7 +71,7 @@ const Home = ({ isConnected, userlist }: Props) => {
       <NavBar />
       <div className={styles.container}>
         <Head>
-          <title>Congrate me!</title>
+          <title>Congrats me!</title>
           <meta name="description" content="Congrate me!" />
           <link rel="icon" href="/me.ico" />
         </Head>
