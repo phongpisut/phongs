@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useRouter } from 'next/router';
 import styles from "../styles/Home.module.css";
 import clientPromise from "../utils/mongodb";
 import {
@@ -9,43 +10,61 @@ import {
   Center,
   useDisclosure,
   Button,
+  Divider,
+  useToast ,
+  IconButton 
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import { CalendarIcon } from '@chakra-ui/icons'
+import React, { useCallback} from "react";
 import NavBar from "./components/navbar";
 import useWindowSize from "../hooks/useWindowSize";
 import Confetti from "react-confetti";
-import CongrateModal from "./components/modal";
-import images from "../images";
-//import GUN from 'gun'
+import CongrateModal from "./components/congrateModal";
+import DetailModal from "./components/detailModal";
+import images from "../assets/images";
 
 type Props = {
   isConnected: boolean;
-  userlist?: [{ name?: string; text?: string; imgurl?: string }];
+  userlist?: [{ name?: string; desc?: string; img?: string }];
 };
 
 const Home = ({ isConnected, userlist }: Props) => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const { windowSize, setWindowSize } = useWindowSize();
+  const { colorMode } = useColorMode();
+  const { windowSize } = useWindowSize();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  // const gun = GUN('https://mvp-gun.herokuapp.com/gun');
-  useEffect(() => {
-    // gun.get('/board/a592cacc4dfe?board=0').on((data, key) => {
-    //   console.log("realtime updates:", data);
-    // });
+  const { isOpen : isOpen2, onOpen :onOpen2, onClose :onClose2} = useDisclosure();
+  const toast = useToast();
+  const router = useRouter();
+  const onPost = useCallback(async (rawData)=>{
 
-    if (isConnected && userlist) {
-      userlist.map((x) => {
-        console.log(x.name);
-      });
-    }
-  }, [isConnected, userlist]);
+ try{
+  const response = await fetch('api/post',{
+    method: 'POST',
+    body:JSON.stringify(rawData)
+  })
+  const data = await response.json()
+  if(data){
+    toast({
+      title: `ส่งข้อความเรียบร้อย`,
+      status: 'success',
+      isClosable: true,
+    })
+    onClose()
+    router.replace(router.asPath);
+  }
+ }catch(err){
+  toast({
+    title: `กรุณาลองอีกครั้ง`,
+    description:`${err}`,
+    status: 'error',
+    isClosable: true,
+  })
+ }
 
-  // const putMessage = useCallback(()=>{
-  //   gun.get('/board/a592cacc4dfe?board=0').put({
-  //     name: "Mark",
-  //     email: "mark@gun.eco",
-  //   });
-  // },[gun])
+  
+  },[toast,onClose,router])
+  
+
 
   return (
     <>
@@ -54,7 +73,7 @@ const Home = ({ isConnected, userlist }: Props) => {
         <Head>
           <title>Congrate me!</title>
           <meta name="description" content="Congrate me!" />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/me.ico" />
         </Head>
         <main className={styles.main}>
           {windowSize.width && (
@@ -65,14 +84,14 @@ const Home = ({ isConnected, userlist }: Props) => {
             />
           )}
 
-          <Box >
+          <Box>
             <Center>
               <SlideFade
                 in={colorMode == "light"}
                 style={{ zIndex: 5, position: "absolute", marginTop: "150px" }}
               >
                 <Image
-                draggable={false}
+                  draggable={false}
                   boxSize="60px"
                   src={images.sg}
                   style={{
@@ -90,7 +109,7 @@ const Home = ({ isConnected, userlist }: Props) => {
                 style={{ zIndex: 5, position: "absolute", marginTop: "150px" }}
               >
                 <Image
-                draggable={false}
+                  draggable={false}
                   boxSize="65px"
                   src={images.nv}
                   style={{
@@ -104,7 +123,7 @@ const Home = ({ isConnected, userlist }: Props) => {
             </Center>
 
             <Image
-            draggable={false}
+              draggable={false}
               borderRadius="full"
               boxSize="250px"
               src={images.mypic}
@@ -123,41 +142,64 @@ const Home = ({ isConnected, userlist }: Props) => {
             <a>พงศ์</a>จะรับปริญญาแล้วน้าา🎓
           </h1>
 
-          <Button mt={5} onClick={onOpen} fontFamily={'Athiti'} disabled={!isConnected}>
-            {" "}
+<Box flexDirection={"row"}>
+<Button
+            mt={5}
+            mb={5}
+            mr={5}
+            onClick={onOpen}
+            fontFamily={"Athiti"}
+            disabled={!isConnected}
+          >
+             {" "}
             ร่วมแสดงความยินดี
           </Button>
+  <IconButton  aria-label='detail' icon={<CalendarIcon />} onClick={onOpen2}/>
 
-          <CongrateModal isOpen={isOpen} onClose={onClose} />
+</Box>
+         
+           
 
-          <div className={styles.grid}>
-            <a href="https://nextjs.org/docs" className={styles.card}>
-              <h2>Documentation &rarr;</h2>
-              <p>Find in-depth information about Next.js features and API.</p>
-            </a>
+          <CongrateModal isOpen={isOpen} onClose={onClose} onSend={onPost}/>
+          <DetailModal isOpen={isOpen2} onClose={onClose2}/>
 
-            <a href="https://nextjs.org/learn" className={styles.card}>
-              <h2>Learn &rarr;</h2>
-              <p>Learn about Next.js in an interactive course with quizzes!</p>
-            </a>
+          <div className={styles.grid} style={{fontFamily:'Athiti'}}>
+            {isConnected &&
+              userlist?.map((x, index) => {
+                return (
+                  <a
+                    key={`comment-${index}`}
+                    href="https://nextjs.org/docs"
+                    className={styles.card}
+                  >
+                    <h2>🎉 {x.name}</h2>
 
-            <a
-              href="https://github.com/vercel/next.js/tree/canary/examples"
-              className={styles.card}
-            >
-              <h2>Examples &rarr;</h2>
-              <p>Discover and deploy boilerplate example Next.js projects.</p>
-            </a>
-
-            <a
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              className={styles.card}
-            >
-              <h2>Deploy &rarr;</h2>
-              <p>
-                Instantly deploy your Next.js site to a public URL with Vercel.
-              </p>
-            </a>
+                    <Box>
+                    <Center>
+                      <p>
+                       {x.desc}
+                      </p>
+                      </Center>
+                      {x.img && (<>
+                        <Divider mt={1}/>
+                      <Center>
+                   
+                          <Image
+                          borderRadius={'md'}
+                          mt={2}
+                          draggable={false}
+                          boxSize="120px"
+                          src={x.img}
+                          alt={`img-comment-${index}`}
+                        />
+                      </Center>
+                      </>
+                            
+                      )}
+                    </Box>
+                  </a>
+                );
+              })}
           </div>
         </main>
 

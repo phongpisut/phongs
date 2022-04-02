@@ -10,27 +10,44 @@ import {
   ModalFooter,
   Input,
   ModalCloseButton,
-  useDisclosure,
   Textarea,
 } from "@chakra-ui/react";
-import React, { MouseEventHandler, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 type CongrateModalProps = {
   isOpen: boolean;
   onClose: any;
+  onSend?:any;
 };
 
 export default function CongrateModal({
   isOpen = false,
   onClose,
+  onSend,
 }: CongrateModalProps) {
   const initialRef = React.useRef<any>();
   const finalRef = React.useRef<any>();
-  const [inputState, setInputState] = useState<{
-    img?: string;
-    name?: string;
-    desc?: string;
-  }>();
+  const [inputState, setInputState] = useState({name:'',img:'',desc:''});
+  const [disable , setDisable] = useState(true)
+
+  useEffect(()=>{
+    if(inputState?.desc && inputState?.name){
+      setDisable(false)
+    }
+    else{
+      setDisable(true)
+    }
+  },[inputState , disable])
+
+
+  const onPressSave = useCallback(
+    () => {
+      onSend(inputState)
+    },
+    [onSend , inputState],
+  )
+  
+  
 
   return (
     <>
@@ -39,6 +56,7 @@ export default function CongrateModal({
         finalFocusRef={finalRef}
         isOpen={isOpen}
         onClose={onClose}
+        onCloseComplete={()=>setInputState({name:'',desc:'',img:''})}
       >
         <ModalOverlay />
         <ModalContent fontFamily={"Athiti"}>
@@ -46,11 +64,11 @@ export default function CongrateModal({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel>ลิ้งค์รูปภาพ</FormLabel>
+              <FormLabel>ลิ้งค์รูปภาพ (ไม่บังคับ)</FormLabel>
               <Input
                 ref={initialRef}
                 placeholder="URL"
-                onChange={(e) => console.log(e.target.value)}
+                onChange={(e) => setInputState({...inputState,img:e.target.value})}
               />
             </FormControl>
 
@@ -59,18 +77,18 @@ export default function CongrateModal({
               <Input
                 ref={initialRef}
                 placeholder="เราเอง"
-                onChange={(e) => console.log(e.target.value)}
+                onChange={(e) => setInputState({...inputState,name:e.target.value})}
               />
             </FormControl>
 
             <FormControl isRequired mt={4}>
               <FormLabel>คำอวยพร / อธิบาย</FormLabel>
-              <Textarea placeholder="ยินดีด้วยย" />
+              <Textarea placeholder="ยินดีด้วยย"  onChange={(e) => setInputState({...inputState,desc:e.target.value})} />
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3}>
+            <Button onClick={onPressSave} colorScheme="blue" mr={3} disabled={disable}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>

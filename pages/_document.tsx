@@ -6,9 +6,11 @@ export default class Document extends NextDocument {
     return (
       <Html lang="en">
         <Head>
-          <link
-            href="https://fonts.googleapis.com/css2?family=Athiti:wght@200;400&family=Prompt:wght@100;200&display=swap"
-            rel="stylesheet"
+        <link
+            rel="preload"
+            href="../assets/fonts/Athiti-Regular.ttf"
+            as="font"
+            crossOrigin=""
           />
         </Head>
         <body>
