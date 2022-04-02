@@ -188,7 +188,8 @@ const Home = ({ isConnected, userlist }: Props) => {
                           borderRadius={'md'}
                           mt={2}
                           draggable={false}
-                          boxSize="120px"
+                          boxSize="130px"
+                          objectFit={"contain"}
                           src={x.img}
                           alt={`img-comment-${index}`}
                         />
