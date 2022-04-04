@@ -169,7 +169,6 @@ const Home = ({ isConnected, userlist }: Props) => {
                 return (
                   <a
                     key={`comment-${index}`}
-                    href="https://nextjs.org/docs"
                     className={styles.card}
                   >
                     <h2>🎉 {x.name}</h2>
